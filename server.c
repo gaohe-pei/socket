@@ -4,33 +4,47 @@
 
 //#pragma comment (lib, "ws2_32.lib")  //加载 ws2_32.dll
 //gcc main.c -o Server -l ws2_32
-int main(){
+int main()
+{
+    char buffer[255];
     //初始化 DLL
     WSADATA wsaData;
-    WSAStartup( MAKEWORD(2, 2), &wsaData);
+    WSAStartup(MAKEWORD(2, 2), &wsaData);
 
     //创建套接字
     SOCKET servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     //绑定套接字
     struct sockaddr_in sockAddr;
-    memset(&sockAddr, 0, sizeof(sockAddr));  //每个字节都用0填充
-    sockAddr.sin_family = PF_INET;  //使用IPv4地址
-    sockAddr.sin_addr.s_addr = inet_addr("127.0.0.1");  //具体的IP地址
-    sockAddr.sin_port = htons(1234);  //端口
-    bind(servSock, (SOCKADDR*)&sockAddr, sizeof(SOCKADDR));
+    memset(&sockAddr, 0, sizeof(sockAddr)); //每个字节都用0填充
+    sockAddr.sin_family = PF_INET;          //使用IPv4地址
+    sockAddr.sin_addr.s_addr = INADDR_ANY;  //具体的IP地址
+    sockAddr.sin_port = htons(9898);        //端口
+    bind(servSock, (SOCKADDR *)&sockAddr, sizeof(SOCKADDR));
 
+    printf("Listening!!!\n");
     //进入监听状态
     listen(servSock, 20);
 
     //接收客户端请求
     SOCKADDR clntAddr;
     int nSize = sizeof(SOCKADDR);
-    SOCKET clntSock = accept(servSock, (SOCKADDR*)&clntAddr, &nSize);
+    SOCKET clntSock = accept(servSock, (SOCKADDR *)&clntAddr, &nSize);
 
+    printf("Client connected. IP:%d\n", clntAddr.sa_family);
     //向客户端发送数据
-    char *str = "Hello World!";
-    send(clntSock, str, strlen(str)+sizeof(char), 1);
+    while (1)
+    {
+        memset(buffer, 0, 255);
+        recv(clntSock, buffer, 255, 0);
+        printf("Client said: %s\n", buffer);
+        memset(buffer, 0, 255);
+        gets(buffer);
+        send(clntSock, buffer, strlen(buffer), 0);
+
+        if(!strncmp("bye",buffer,3)) break;
+        
+    }
 
     //关闭套接字
     closesocket(clntSock);

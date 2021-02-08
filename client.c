@@ -3,6 +3,9 @@
 #include <WinSock2.h>
 //#pragma comment(lib, "ws2_32.lib")  //加载 ws2_32.dll
 int main(){
+
+    char buffer[255];
+    int n;
     //初始化DLL
     WSADATA wsaData;
     WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -12,14 +15,22 @@ int main(){
     struct sockaddr_in sockAddr;
     memset(&sockAddr, 0, sizeof(sockAddr));  //每个字节都用0填充
     sockAddr.sin_family = PF_INET;
-    sockAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    sockAddr.sin_port = htons(1234);
+    sockAddr.sin_addr.s_addr = inet_addr("192.168.211.130");
+    sockAddr.sin_port = htons(9898);
     connect(sock, (SOCKADDR*)&sockAddr, sizeof(SOCKADDR));
+
+    printf("Server connected, you can say 'hello'\n");
     //接收服务器传回的数据
-    char szBuffer[MAXBYTE] = {0};
-    recv(sock, szBuffer, MAXBYTE, 0);
-    //输出接收到的数据
-    printf("Message form server: %s\n", szBuffer);
+    while(1)
+    {
+        memset(buffer,0,255);
+        gets(buffer);
+        n=send(sock,buffer,strlen(buffer),0);
+        memset(buffer,0,255);
+        n=recv(sock,buffer,255,0);
+        printf("Sever said: %s\n",buffer);
+        if(!strncmp("bye",buffer,3)) break;
+    }
     //关闭套接字
     closesocket(sock);
     //终止使用 DLL
