@@ -15,7 +15,7 @@ int main()
     SOCKET servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     //绑定套接字
-    struct sockaddr_in sockAddr;
+    struct sockaddr_in sockAddr,clntAddr;
     memset(&sockAddr, 0, sizeof(sockAddr)); //每个字节都用0填充
     sockAddr.sin_family = PF_INET;          //使用IPv4地址
     sockAddr.sin_addr.s_addr = INADDR_ANY;  //具体的IP地址
@@ -27,11 +27,11 @@ int main()
     listen(servSock, 20);
 
     //接收客户端请求
-    SOCKADDR clntAddr;
+    //SOCKADDR clntAddr;
     int nSize = sizeof(SOCKADDR);
     SOCKET clntSock = accept(servSock, (SOCKADDR *)&clntAddr, &nSize);
-
-    printf("Client connected. IP:%d\n", clntAddr.sa_family);
+    char *ip_cli=inet_ntoa(clntAddr.sin_addr);
+    printf("Client connected. IP:%s\n", ip_cli);
     //向客户端发送数据
     while (1)
     {
